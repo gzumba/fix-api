@@ -20,7 +20,13 @@ class ApiOrderServiceTest extends TestCase
 
         $client = ScopingHttpClient::forBaseUri(HttpClient::create(), 'https://careers-api.fixably.com/');
 
-        $this->orderService = new ApiOrderService($client);
+        $code = $_ENV['API_CODE'] ?? '<code>';
+
+        if ($code === '<code>') {
+            self::fail('Add a code for Token Fetching to .env');
+        }
+
+        $this->orderService = new ApiOrderService($client, $code);
         // this is enough to verify the code works and makes the tests faster:
         $this->orderService->setMaxPages(2);
     }

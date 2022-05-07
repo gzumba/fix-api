@@ -15,15 +15,16 @@ const UNKNOWN_STATUS = 'UNKNOWN STATUS';
 
 class ApiOrderService implements OrderService
 {
-    private const CODE = 57149595;
     const ERROR_INVALID_PAGE = 'Invalid page';
     private HttpClientInterface $client;
     private ?string $token = null;
     private ?int $max_pages = null;
+    private string $api_code;
 
-    public function __construct(HttpClientInterface $fixablyClient)
+    public function __construct(HttpClientInterface $fixablyClient, string $api_code)
     {
         $this->client = $fixablyClient;
+        $this->api_code = $api_code;
     }
 
     /**
@@ -151,7 +152,7 @@ class ApiOrderService implements OrderService
     private function resolveToken(): string
     {
         if (!$this->token) {
-            $this->token = $this->fetchTokenForCode(self::CODE);
+            $this->token = $this->fetchTokenForCode((int)$this->api_code);
         }
 
         return $this->token;
