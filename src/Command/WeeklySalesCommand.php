@@ -24,12 +24,13 @@ class WeeklySalesCommand extends Command
 
     protected function configure()
     {
-        $this->addArgument('start_date', InputArgument::REQUIRED, 'Period start')
-            ->addArgument('end_date', InputArgument::REQUIRED, 'Period end')
+        $this->addArgument('start_date', InputArgument::OPTIONAL, 'Period start', '2020-11-1')
+            ->addArgument('end_date', InputArgument::OPTIONAL, 'Period end', '2020-12-1')
+            ->setDescription("Show sales report for a period")
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $sales = $this->orderService->fetchWeeklySales(
             new \DateTime($input->getArgument('start_date')),

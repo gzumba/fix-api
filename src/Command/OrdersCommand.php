@@ -24,10 +24,12 @@ class OrdersCommand extends Command
 
     protected function configure()
     {
-        $this->addArgument('brand', InputArgument::REQUIRED, 'Brand to fetch');
+        $this->addArgument('brand', InputArgument::OPTIONAL, 'Brand to fetch', 'iPhone')
+            ->setDescription("Fetch all orders for a Brand with an assigned Technician")
+        ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $orders = $this->orderService->fetchBrandOrders($input->getArgument('brand'))
             ->filter(fn (Order $order) => $order->technician !== null)

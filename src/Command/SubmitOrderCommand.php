@@ -22,13 +22,18 @@ class SubmitOrderCommand extends Command
         $this->orderService = $orderService;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function configure()
+    {
+        $this->setDescription('Submit a new Repair Order');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $type = $io->choice('Device Type', ['Laptop', 'Phone', 'Tablet']);
-        $manufacturer = $io->ask('Manufacturer');
-        $brand = $io->ask('Brand');
-        $issue = $io->ask('Issue description');
+        $type = $io->choice('Device Type', ['Laptop', 'Phone', 'Tablet'], 0);
+        $manufacturer = $io->ask('Manufacturer', 'Apple');
+        $brand = $io->ask('Brand', 'MacBook Pro');
+        $issue = $io->ask('Issue description', 'Broken screen');
 
         $new_order = new NewOrder($manufacturer, $brand, $type, $issue);
 

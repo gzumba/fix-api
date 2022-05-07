@@ -20,7 +20,12 @@ class OrderStatusCountsCommand extends Command
         $this->orderService = $orderService;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function configure()
+    {
+        $this->setDescription('Show counts of orders with each status');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $status_counts = $this->orderService->fetchStatusCounts();
 
