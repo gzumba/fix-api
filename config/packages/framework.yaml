@@ -17,6 +17,12 @@ framework:
     php_errors:
         log: true
 
+    http_client:
+      scoped_clients:
+        fixably.client:
+          base_uri: "https://careers-api.fixably.com/"
+
+
 when@test:
     framework:
         test: true
