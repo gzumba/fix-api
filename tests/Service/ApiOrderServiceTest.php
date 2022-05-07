@@ -21,6 +21,7 @@ class ApiOrderServiceTest extends TestCase
         $client = ScopingHttpClient::forBaseUri(HttpClient::create(), 'https://careers-api.fixably.com/');
 
         $this->orderService = new ApiOrderService($client);
+        // this is enough to verify the code works and makes the tests faster:
         $this->orderService->setMaxPages(2);
     }
 
@@ -74,4 +75,10 @@ class ApiOrderServiceTest extends TestCase
         self::assertEquals('Broken screen', $note->description, "Note should match what we submitted");
     }
 
+    public function testSubmittingAnOrderWithBadType(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $o = new NewOrder('Apple', 'iPhone', 'Something', 'Broken screen');
+    }
 }

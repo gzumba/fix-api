@@ -25,7 +25,7 @@ interface OrderService
     /**
      * @return iterable<WeekSales>
      */
-    public function fetchWeeklySales(\DateTimeInterface $start, \DateTimeInterface $end);
+    public function fetchWeeklySales(\DateTimeInterface $start, \DateTimeInterface $end): iterable;
 
     public function submitOrder(NewOrder $new_order): OrderDetails;
 }

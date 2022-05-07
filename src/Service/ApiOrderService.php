@@ -26,6 +26,10 @@ class ApiOrderService implements OrderService
         $this->client = $fixablyClient;
     }
 
+    /**
+     * Set maximum number of pages to fetch, handy while developing and testing to speed
+     * up working with large result sets
+     */
     public function setMaxPages(int $max_pages): void
     {
         $this->max_pages = $max_pages;
@@ -33,12 +37,10 @@ class ApiOrderService implements OrderService
 
     public function fetchStatusCounts(): iterable
     {
-        $status_counts = Collection::from($this->fetchPages('/orders'))
-            ->map(fn (array $page) => $page['results'])
-            ->flatten(1)
+        $status_counts = $this->collectResults($this->fetchPages('/orders'))
             ->map(fn (array $order) => $this->mapStatus($order['status']))
             ->countBy(fn (string $status) => $status)
-            ->sort(fn ($value1, $value2) => $value2 <=> $value1)
+            ->sort(fn ($count_1, $count_2) => $count_2 <=> $count_1)
             ->toArray()
         ;
 
@@ -50,20 +52,16 @@ class ApiOrderService implements OrderService
      */
     public function fetchBrandOrders(string $brand): Collection
     {
-        return Collection::from($this->fetchPostPages('/search/devices', ['Criteria' => sprintf("*%s*", $brand)]))
-            ->map(fn (array $page) => $page['results'])
-            ->flatten(1)
+        return $this->collectResults($this->fetchPostPages('/search/devices', ['Criteria' => sprintf("*%s*", $brand)]))
             ->map(fn (array $row) => $this->buildOrder($row))
-        ;
+            ;
     }
 
-    public function fetchWeeklySales(\DateTimeInterface $start, \DateTimeInterface $end)
+    public function fetchWeeklySales(\DateTimeInterface $start, \DateTimeInterface $end): iterable
     {
         $path = sprintf("/report/%s/%s", $start->format('Y-m-d'), $end->format('Y-m-d'));
 
-        return Collection::from($this->fetchPostPages($path, []))
-            ->map(fn (array $page) => $page['results'])
-            ->flatten(1)
+        return $this->collectResults($this->fetchPostPages($path, []))
             ->map(fn (array $row) => $this->buildOrderBill($row))
             ->groupBy(fn (OrderBill $orderBill) => $orderBill->created->format('Y, W'))
             ->map(function (Collection $weekly_bills, $week) {
@@ -99,7 +97,7 @@ class ApiOrderService implements OrderService
         return $this->fetchOrder($new_order->id);
     }
 
-    private function fetchPages(string $path): iterable
+    private function fetchPages(string $path): \Traversable
     {
         $page = 1;
         $finished = false;
@@ -112,7 +110,7 @@ class ApiOrderService implements OrderService
         } while (!$finished && (!$this->max_pages || $page <= $this->max_pages));
     }
 
-    private function fetchPostPages(string $path, array $data): iterable
+    private function fetchPostPages(string $path, array $data): \Traversable
     {
         $page = 1;
         $finished = false;
@@ -227,6 +225,15 @@ class ApiOrderService implements OrderService
         $res = $this->getJson("/orders/{$id}");
 
         return new OrderDetails(...$res);
+    }
+
+    private function collectResults(\Traversable $pages): Collection
+    {
+        return Collection::from($pages)
+            ->map(fn (array $page) => $page['results'])
+            ->flatten(1)
+        ;
+
     }
 
 }
